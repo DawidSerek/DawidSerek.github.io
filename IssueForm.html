@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Specyfikacja Form</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .add-btn {
+            margin-top: 10px;
+        }
+        textarea {
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Specyfikacja Form</h2>
+        <form id="specForm" onsubmit="updateSpec(event)">
+            <fieldset class="border p-3 mb-3">
+                <legend class="w-auto px-2">Specyfikacja</legend>
+                <div class="form-group">
+                    <label for="uriInput">* URI zasobu (jeżeli aplikowalne):</label>
+                    <input type="text" class="form-control" id="uriInput" name="uri">
+                </div>
+
+                <div class="form-group">
+                    <label for="problemShortInput">* Na czym polega problem (krótka wersja opisu):</label>
+                    <textarea id="problemShortInput" class="form-control" rows="3" name="problemShort"></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset class="border p-3 mb-3">
+                <legend class="w-auto px-2">Opis</legend>
+
+                <div class="form-group">
+                    <label>Jak odtworzyć problem (jeżeli aplikowalne):</label>
+                    <div id="reproStepsContainer">
+                        <input type="text" class="form-control mb-2 reproStepInput" placeholder="Dodaj krok">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm add-btn" onclick="addReproStep()">Dodaj krok</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="longDescriptionInput">Dłuższy opis problemu:</label>
+                    <textarea id="longDescriptionInput" class="form-control" rows="5" name="longDescription"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Kroki do realizacji (jeżeli aplikowalne):</label>
+                    <div id="actionStepsContainer">
+                        <input type="text" class="form-control mb-2 actionStepInput" placeholder="Dodaj krok">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm add-btn" onclick="addActionStep()">Dodaj krok</button>
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-success btn-block">Submit</button>
+        </form>
+
+        <div class="form-group mt-4">
+            <label for="output">Output:</label>
+            <textarea id="output" class="form-control" rows="10" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Function to add new input fields for reproduction steps
+        function addReproStep() {
+            const container = document.getElementById("reproStepsContainer");
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = "form-control mb-2 reproStepInput";
+            input.placeholder = "Dodaj krok";
+            container.appendChild(input);
+        }
+
+        // Function to add new input fields for action steps
+        function addActionStep() {
+            const container = document.getElementById("actionStepsContainer");
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = "form-control mb-2 actionStepInput";
+            input.placeholder = "Dodaj krok";
+            container.appendChild(input);
+        }
+
+        function updateSpec(event) {
+            // Prevents the form from reloading the page
+            event.preventDefault();
+
+            // Collecting input values
+            const uri = document.getElementById("uriInput").value.trim();
+            const problemShort = document.getElementById("problemShortInput").value.trim();
+
+            // Collecting values from all reproduction step inputs
+            const reproSteps = Array.from(document.getElementsByClassName("reproStepInput"))
+                .map(input => input.value.trim())
+                .filter(step => step);
+
+            // Collecting values from all action step inputs
+            const actionSteps = Array.from(document.getElementsByClassName("actionStepInput"))
+                .map(input => input.value.trim())
+                .filter(step => step);
+
+            const longDescription = document.getElementById("longDescriptionInput").value.trim();
+
+            // Create output with a structured format (plain text)
+            let outputText = "";
+
+            // Specyfikacja section
+            if (uri || problemShort) {
+                outputText += `# Specyfikacja\n`;
+                if (uri) outputText += `* **URI zasobu**: ${uri}\n`;
+                if (problemShort) outputText += `* **Na czym polega problem**: ${problemShort}\n`;
+            }
+
+            // Opis section
+            if (reproSteps.length || longDescription || actionSteps.length) {
+                outputText += `\n# Opis\n`;
+
+                // Adding reproduction steps if any
+                if (reproSteps.length) {
+                    outputText += `## Jak odtworzyć problem\n`;
+                    reproSteps.forEach(step => {
+                        outputText += `* ${step}\n`;
+                    });
+                }
+
+                // Adding long description if provided
+                if (longDescription) {
+                    outputText += `\n## Dłuższy opis\n${longDescription}\n`;
+                }
+
+                // Adding action steps if any
+                if (actionSteps.length) {
+                    outputText += `\n## Kroki do realizacji\n`;
+                    actionSteps.forEach(step => {
+                        outputText += `* ${step}\n`;
+                    });
+                }
+            }
+
+            // Update the output section
+            document.getElementById("output").value = outputText.trim();
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
